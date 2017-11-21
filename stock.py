@@ -32,6 +32,7 @@ class Package(ModelSQL, ModelView):
         domain=[
             ('shipment', '=', Eval('shipment')),
             ('to_location.type', 'in', ['customer', 'supplier']),
+            ('state', '!=', 'cancel'),
             ],
         add_remove=[
             ('package', '=', None),
@@ -136,7 +137,7 @@ class ShipmentOut(PackageMixin, object):
         for shipment in shipments:
             if not shipment.packages:
                 continue
-            if (len(shipment.outgoing_moves)
+            if (len(filter(lambda s: s.state != 'cancel', shipment.outgoing_moves))
                     != sum(len(p.moves) for p in shipment.packages)):
                 cls.raise_user_error('package_mismatch', shipment.rec_name)
 
@@ -161,7 +162,7 @@ class ShipmentInReturn(PackageMixin, object):
         for shipment in shipments:
             if not shipment.packages:
                 continue
-            if (len(shipment.moves)
+            if (len(filter(lambda s: s.state != 'cancel', shipment.moves))
                     != sum(len(p.moves) for p in shipment.packages)):
                 cls.raise_user_error('package_mismatch', shipment.rec_name)
 
