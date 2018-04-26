@@ -137,8 +137,10 @@ class ShipmentOut(PackageMixin, object):
         for shipment in shipments:
             if not shipment.packages:
                 continue
-            if (len(filter(lambda s: s.state != 'cancel', shipment.outgoing_moves))
-                    != sum(len(p.moves) for p in shipment.packages)):
+            if (len(filter(
+                    lambda s: (s.state != 'cancel' and s.quantity),
+                    shipment.outgoing_moves
+                )) != sum(len(p.moves) for p in shipment.packages)):
                 cls.raise_user_error('package_mismatch', shipment.rec_name)
 
 
@@ -162,8 +164,10 @@ class ShipmentInReturn(PackageMixin, object):
         for shipment in shipments:
             if not shipment.packages:
                 continue
-            if (len(filter(lambda s: s.state != 'cancel', shipment.moves))
-                    != sum(len(p.moves) for p in shipment.packages)):
+            if (len(filter(
+                    lambda s: (s.state != 'cancel' and s.quantity),
+                    shipment.moves
+                )) != sum(len(p.moves) for p in shipment.packages)):
                 cls.raise_user_error('package_mismatch', shipment.rec_name)
 
 
